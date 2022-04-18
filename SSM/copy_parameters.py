@@ -3,13 +3,13 @@ import json
 
 
 FROM = "Dev"
-TO = "Reventador"
-FROM_PATH = "/ci/usrv-bank-conciliation/"
+TO = "Chimborazo"
+FROM_PATH = "/ci/usrv-calendar/"
 OVERWRITE = False # This will overwite all the parameters if already exists
 REGION = "us-east-1"
 FUNCTION_NAME = "usrv-kushki-ci-dev-microServiceDeploy"
-MICRO_NAME = "usrv-bank-conciliation"
-BRANCH = "release/13035"
+MICRO_NAME = "usrv-calendar"
+BRANCH = "release/13138"
 
 def get_session(profile, region, service):
     session = boto3.Session(profile_name=profile, region_name=region)
