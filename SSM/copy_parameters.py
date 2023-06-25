@@ -3,34 +3,53 @@ import json
 
 
 FROM = "Dev"
-TO = "Chimborazo"
-FROM_PATH = "/ci/usrv-calendar/"
+TO = "Orizaba"
+FROM_PATH = "/qa/usrv-billing-charges/"
 OVERWRITE = False # This will overwite all the parameters if already exists
 REGION = "us-east-1"
 FUNCTION_NAME = "usrv-kushki-ci-dev-microServiceDeploy"
-MICRO_NAME = "usrv-calendar"
-BRANCH = "release/13138"
+MICRO_NAME = "usrv-billing-charges"
+BRANCH = "rmaster"
 
 def get_session(profile, region, service):
     session = boto3.Session(profile_name=profile, region_name=region)
     return session.client(service)
 
 def copy_parameters():
+    parameters = []
     client = get_session(FROM, REGION, "ssm") # From
 
     result = client.get_parameters_by_path(
         Path= FROM_PATH,
         Recursive= True
     )
-    return result
+
+    parameters = result["Parameters"]
+
+    try:
+        while(result["NextToken"] is not None):
+            result = client.get_parameters_by_path(
+                NextToken= result["NextToken"],
+                Path= FROM_PATH,
+                Recursive= True
+            )
+            print(result)
+            parameters = parameters + result["Parameters"]
+    except:
+        print("There was an exception")
+
+    return parameters
 
 def set_parameters(params):
     client = get_session(TO, REGION, "ssm") # To
-
-    for res in params["Parameters"]:
+    print("HEREEE")
+    print(params)
+    
+    for res in params:
         try:
+            print(res['Name'])
             client.put_parameter(
-                Name = res['Name'].replace("/ci/", "/qa/"),
+                Name = res['Name'].replace("/qa/", "/qa/"),
                 Value = res['Value'],
                 Type = "String",
                 Overwrite = OVERWRITE
@@ -55,8 +74,9 @@ def call_deploy():
 
 def main():
     params = copy_parameters()
+    print(params)
     set_parameters(params)
-    call_deploy()
+    #call_deploy()
 
 
 if __name__ == "__main__":
